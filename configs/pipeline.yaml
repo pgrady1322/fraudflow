@@ -1,0 +1,80 @@
+# ═══════════════════════════════════════════════════════════════════════
+# FraudFlow — Pipeline Configuration
+# ═══════════════════════════════════════════════════════════════════════
+
+project:
+  name: fraudflow
+  version: 0.1.0
+  seed: 42
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  splits_dir: data/splits
+  # Temporal split boundaries (Elliptic has 49 timesteps)
+  train_timesteps: [1, 34]
+  val_timesteps: [35, 42]
+  test_timesteps: [43, 49]
+
+features:
+  # Graph topology features to add
+  graph_features:
+    - degree
+    - clustering_coefficient
+    - pagerank
+    - betweenness_centrality_approx
+  # Neighbor aggregation
+  neighbor_agg:
+    hops: 2
+    functions: [mean, std, max]
+
+model:
+  type: xgboost             # xgboost | logistic_regression | random_forest
+  params:
+    max_depth: 8
+    learning_rate: 0.05
+    n_estimators: 500
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 5
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    scale_pos_weight: auto  # auto-computed from class ratio
+    eval_metric: aucpr
+    random_state: 42
+
+training:
+  resampling:
+    strategy: hybrid          # none | oversample | undersample | hybrid
+    max_majority: 50000
+    target_minority_ratio: 0.3
+  cross_validation:
+    n_folds: 5
+    stratified: true
+  hp_search:
+    enabled: false
+    n_trials: 50
+    metric: f1_illicit
+
+evaluation:
+  threshold: 0.5
+  metrics:
+    - accuracy
+    - f1_illicit
+    - f1_macro
+    - precision_illicit
+    - recall_illicit
+    - auc_roc
+    - auc_pr
+    - confusion_matrix
+
+mlflow:
+  tracking_uri: mlruns        # local directory (or http://... for remote)
+  experiment_name: fraudflow
+  register_model: true
+  model_name: fraud-detector
+
+serving:
+  host: 0.0.0.0
+  port: 8000
+  model_path: models/registry/model.pkl

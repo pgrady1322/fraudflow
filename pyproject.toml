@@ -1,0 +1,88 @@
+# ═══════════════════════════════════════════════════════════════════════
+# FraudFlow — MLOps Pipeline for Graph-Based Fraud Detection
+# ═══════════════════════════════════════════════════════════════════════
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fraudflow"
+version = "0.1.0"
+description = "End-to-end MLOps pipeline for graph-based fraud detection with DVC, MLflow, and CI/CD"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Patrick Grady"}]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "scikit-learn>=1.3",
+    "xgboost>=2.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+    "networkx>=3.0",
+    "pyyaml",
+    "tqdm",
+    "rich",
+    "mlflow>=2.10",
+    "dvc>=3.40",
+    "dvc-s3>=3.0",
+    "fastapi>=0.109",
+    "uvicorn>=0.27",
+    "pydantic>=2.0",
+    "httpx>=0.27",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+gnn = [
+    "torch>=2.0",
+    "torch-geometric>=2.4",
+]
+dev = ["pytest>=7.0", "pytest-cov", "ruff", "mypy"]
+all = ["fraudflow[gnn,dev]"]
+
+[project.scripts]
+fraudflow = "src.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/pgrady1322/fraudflow"
+Repository = "https://github.com/pgrady1322/fraudflow"
+
+# ═══════════════════════════════════════════════════════════════════════
+# Tool Configuration
+# ═══════════════════════════════════════════════════════════════════════
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]

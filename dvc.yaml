@@ -1,0 +1,88 @@
+# ═══════════════════════════════════════════════════════════════════════
+# FraudFlow — DVC Pipeline (dvc.yaml)
+# ═══════════════════════════════════════════════════════════════════════
+# Run the full pipeline:  dvc repro
+# Run a single stage:     dvc repro <stage_name>
+# Visualise the DAG:      dvc dag
+# ═══════════════════════════════════════════════════════════════════════
+
+stages:
+  # ── Stage 1: Download / validate raw data ─────────────────────────
+  download:
+    cmd: python -m src.data.download --output data/raw
+    deps:
+      - src/data/download.py
+    outs:
+      - data/raw/elliptic_txs_features.csv
+      - data/raw/elliptic_txs_classes.csv
+      - data/raw/elliptic_txs_edgelist.csv
+    frozen: true   # only run manually (large download)
+
+  # ── Stage 2: Feature engineering ──────────────────────────────────
+  featurize:
+    cmd: python -m src.features.engineer --config configs/pipeline.yaml
+    deps:
+      - src/features/engineer.py
+      - data/raw/elliptic_txs_features.csv
+      - data/raw/elliptic_txs_classes.csv
+      - data/raw/elliptic_txs_edgelist.csv
+      - configs/pipeline.yaml
+    outs:
+      - data/processed/features.parquet
+    metrics:
+      - data/processed/feature_stats.json:
+          cache: false
+
+  # ── Stage 3: Split data (temporal) ────────────────────────────────
+  split:
+    cmd: python -m src.data.split --config configs/pipeline.yaml
+    deps:
+      - src/data/split.py
+      - data/processed/features.parquet
+      - configs/pipeline.yaml
+    outs:
+      - data/splits/train.parquet
+      - data/splits/val.parquet
+      - data/splits/test.parquet
+    metrics:
+      - data/splits/split_stats.json:
+          cache: false
+
+  # ── Stage 4: Train model ──────────────────────────────────────────
+  train:
+    cmd: python -m src.training.train --config configs/pipeline.yaml
+    deps:
+      - src/training/train.py
+      - src/training/models.py
+      - data/splits/train.parquet
+      - data/splits/val.parquet
+      - configs/pipeline.yaml
+    outs:
+      - models/registry/model.pkl
+    metrics:
+      - models/registry/metrics.json:
+          cache: false
+    plots:
+      - models/registry/confusion_matrix.csv:
+          x: predicted
+          y: actual
+          template: confusion
+
+  # ── Stage 5: Evaluate on held-out test set ────────────────────────
+  evaluate:
+    cmd: python -m src.training.evaluate --config configs/pipeline.yaml
+    deps:
+      - src/training/evaluate.py
+      - data/splits/test.parquet
+      - models/registry/model.pkl
+      - configs/pipeline.yaml
+    metrics:
+      - models/registry/test_metrics.json:
+          cache: false
+    plots:
+      - models/registry/roc_curve.csv:
+          x: fpr
+          y: tpr
+      - models/registry/precision_recall.csv:
+          x: recall
+          y: precision

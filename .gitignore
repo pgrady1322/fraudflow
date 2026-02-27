@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════════════
+# FraudFlow .gitignore
+# ═══════════════════════════════════════════════════════════════════════
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (tracked by DVC)
+data/raw/
+data/processed/
+data/splits/
+/tmp/
+
+# Models (tracked by DVC / MLflow)
+models/registry/*.pkl
+models/registry/*.json
+models/registry/*.pt
+
+# MLflow
+mlruns/
+mlflow.db
+
+# DVC local cache
+.dvc/cache/
+.dvc/tmp/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets
+.env
+*.pem

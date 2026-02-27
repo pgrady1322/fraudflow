@@ -1,0 +1,6 @@
+[core]
+    remote = local
+    autostage = true
+
+['remote "local"']
+    url = /tmp/fraudflow_dvc_store
