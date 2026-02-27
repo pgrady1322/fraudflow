@@ -26,8 +26,8 @@ from pydantic import BaseModel, Field
 from src.serving.metrics import (
     PrometheusMiddleware,
     metrics_endpoint,
-    record_predictions,
     record_inference_time,
+    record_predictions,
     update_model_status,
 )
 
@@ -158,7 +158,7 @@ async def predict(request: PredictionRequest):
     try:
         X = np.array(request.features, dtype=np.float64)
     except (ValueError, TypeError) as e:
-        raise HTTPException(status_code=422, detail=f"Invalid feature format: {e}")
+        raise HTTPException(status_code=422, detail=f"Invalid feature format: {e}") from None
 
     t0 = time.time()
     predictions = _model.predict(X).tolist()

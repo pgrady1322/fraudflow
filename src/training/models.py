@@ -13,7 +13,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
@@ -43,10 +42,20 @@ def create_model(model_type: str, params: dict[str, Any], n_pos: int = 1, n_neg:
 
     if model_type == "xgboost":
         valid_keys = {
-            "max_depth", "learning_rate", "n_estimators", "subsample",
-            "colsample_bytree", "min_child_weight", "reg_alpha", "reg_lambda",
-            "scale_pos_weight", "eval_metric", "random_state",
-            "tree_method", "device", "gamma",
+            "max_depth",
+            "learning_rate",
+            "n_estimators",
+            "subsample",
+            "colsample_bytree",
+            "min_child_weight",
+            "reg_alpha",
+            "reg_lambda",
+            "scale_pos_weight",
+            "eval_metric",
+            "random_state",
+            "tree_method",
+            "device",
+            "gamma",
         }
         filtered = {k: v for k, v in params.items() if k in valid_keys}
         return XGBClassifier(

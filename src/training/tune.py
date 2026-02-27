@@ -23,7 +23,7 @@ import numpy as np
 import optuna
 import pandas as pd
 import yaml
-from sklearn.metrics import f1_score, roc_auc_score, average_precision_score
+from sklearn.metrics import average_precision_score, f1_score, roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
 from src.training.models import create_model, get_feature_columns
@@ -114,7 +114,7 @@ def make_objective(
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
         scores = []
 
-        for fold_i, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+        for _fold_i, (train_idx, val_idx) in enumerate(skf.split(X, y)):
             X_tr, X_vl = X[train_idx], X[val_idx]
             y_tr, y_vl = y[train_idx], y[val_idx]
 

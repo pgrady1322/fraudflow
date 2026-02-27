@@ -12,9 +12,7 @@ License: MIT License - See LICENSE
 
 from __future__ import annotations
 
-import json
 import logging
-import sys
 
 import click
 import yaml
@@ -37,7 +35,9 @@ def main(verbose: bool):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def download(config: str):
     """Stage 1: Download the Elliptic Bitcoin dataset."""
     from src.data.download import download_elliptic
@@ -50,7 +50,9 @@ def download(config: str):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def featurize(config: str):
     """Stage 2: Engineer graph topology features."""
     from src.features.engineer import engineer_features
@@ -63,7 +65,9 @@ def featurize(config: str):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def split(config: str):
     """Stage 3: Create temporal train/val/test splits."""
     from src.data.split import temporal_split
@@ -80,7 +84,9 @@ def split(config: str):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def train(config: str):
     """Stage 4: Train model with MLflow tracking."""
     from src.training.train import train_pipeline
@@ -93,7 +99,9 @@ def train(config: str):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def evaluate(config: str):
     """Stage 5: Evaluate model on held-out test set."""
     from src.training.evaluate import evaluate_pipeline
@@ -113,7 +121,9 @@ def evaluate(config: str):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def tune(config: str):
     """Run Optuna hyperparameter search with MLflow tracking."""
     from src.training.tune import tune_pipeline
@@ -127,7 +137,9 @@ def tune(config: str):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def explain(config: str):
     """Generate SHAP model explanations."""
     from src.training.explain import generate_explanations
@@ -136,12 +148,16 @@ def explain(config: str):
         cfg = yaml.safe_load(f)
 
     summary = generate_explanations(cfg)
-    click.echo(f"✓ Explanations: {summary['n_samples_explained']} samples, {summary['n_features']} features")
+    click.echo(
+        f"✓ Explanations: {summary['n_samples_explained']} samples, {summary['n_features']} features"
+    )
     click.echo(f"  Top feature: {summary['top_features'][0]['feature']}")
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 def drift(config: str):
     """Generate data and model drift monitoring reports."""
     from src.monitoring.drift import monitor
@@ -151,7 +167,9 @@ def drift(config: str):
 
     result = monitor(cfg)
     data = result.get("data_drift", {})
-    click.echo(f"✓ Drift: {data.get('n_drifted', '?')}/{data.get('n_features', '?')} features drifted")
+    click.echo(
+        f"✓ Drift: {data.get('n_drifted', '?')}/{data.get('n_features', '?')} features drifted"
+    )
 
 
 # ── Serve ───────────────────────────────────────────────────────────
@@ -165,6 +183,7 @@ def drift(config: str):
 def serve(host: str, port: int, model_path: str, reload: bool):
     """Launch FastAPI model serving endpoint."""
     import uvicorn
+
     import src.serving.app as serving_app
 
     serving_app._model_path = model_path
@@ -182,15 +201,17 @@ def serve(host: str, port: int, model_path: str, reload: bool):
 
 
 @main.command()
-@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+@click.option(
+    "-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML"
+)
 @click.option("--skip-download", is_flag=True, help="Skip data download")
 def pipeline(config: str, skip_download: bool):
     """Run the full pipeline: download → featurize → split → train → evaluate."""
     from src.data.download import download_elliptic
     from src.data.split import temporal_split
     from src.features.engineer import engineer_features
-    from src.training.train import train_pipeline
     from src.training.evaluate import evaluate_pipeline
+    from src.training.train import train_pipeline
 
     with open(config) as f:
         cfg = yaml.safe_load(f)

@@ -102,17 +102,13 @@ def compute_shap_values(
     else:
         logger.info(f"Using KernelExplainer for {model_name}")
         background = shap.kmeans(X_sample, min(50, len(X_sample)))
-        predict_fn = (
-            model.predict_proba
-            if hasattr(model, "predict_proba")
-            else model.predict
-        )
+        predict_fn = model.predict_proba if hasattr(model, "predict_proba") else model.predict
         explainer = shap.KernelExplainer(lambda x: predict_fn(x)[:, 1], background)
-        sv = explainer.shap_values(X_sample[:min(200, len(X_sample))])
+        sv = explainer.shap_values(X_sample[: min(200, len(X_sample))])
         shap_values = shap.Explanation(
             values=sv,
             base_values=explainer.expected_value,
-            data=X_sample[:min(200, len(X_sample))],
+            data=X_sample[: min(200, len(X_sample))],
             feature_names=feature_names,
         )
 
@@ -159,10 +155,12 @@ def generate_explanations(cfg: dict[str, Any]) -> dict:
 
     # ── Mean absolute SHAP values table ─────────────────────────────
     mean_abs_shap = np.abs(shap_values.values).mean(axis=0)
-    importance_df = pd.DataFrame({
-        "feature": feature_names,
-        "mean_abs_shap": mean_abs_shap,
-    }).sort_values("mean_abs_shap", ascending=False)
+    importance_df = pd.DataFrame(
+        {
+            "feature": feature_names,
+            "mean_abs_shap": mean_abs_shap,
+        }
+    ).sort_values("mean_abs_shap", ascending=False)
     importance_df.to_csv(output_dir / "shap_importance.csv", index=False)
 
     # ── Per-class waterfall for top illicit and licit examples ──────
@@ -185,9 +183,7 @@ def generate_explanations(cfg: dict[str, Any]) -> dict:
             fig = plt.gcf()
             fig.suptitle(f"SHAP Waterfall — Typical {label.title()} Transaction", y=1.02)
             fig.tight_layout()
-            fig.savefig(
-                output_dir / f"shap_waterfall_{label}.png", dpi=150, bbox_inches="tight"
-            )
+            fig.savefig(output_dir / f"shap_waterfall_{label}.png", dpi=150, bbox_inches="tight")
             plt.close(fig)
             logger.info(f"✓ Waterfall plot ({label}) saved")
 

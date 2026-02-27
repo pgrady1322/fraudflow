@@ -16,12 +16,12 @@ import time
 
 from fastapi import Request, Response
 from prometheus_client import (
+    CONTENT_TYPE_LATEST,
     Counter,
     Gauge,
     Histogram,
     Info,
     generate_latest,
-    CONTENT_TYPE_LATEST,
 )
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response as StarletteResponse
@@ -83,9 +83,7 @@ MODEL_LOADED = Gauge(
 class PrometheusMiddleware(BaseHTTPMiddleware):
     """Middleware that records request counts and latencies."""
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         method = request.method
         path = request.url.path
 

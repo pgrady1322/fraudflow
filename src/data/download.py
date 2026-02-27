@@ -16,18 +16,16 @@ from __future__ import annotations
 import argparse
 import hashlib
 import logging
-import os
 import shutil
-import zipfile
 from pathlib import Path
 
 logger = logging.getLogger("fraudflow.download")
 
 # Expected files and their approximate sizes (bytes)
 EXPECTED_FILES = {
-    "elliptic_txs_features.csv": 170_000_000,   # ~170 MB
-    "elliptic_txs_classes.csv": 4_000_000,       # ~4 MB
-    "elliptic_txs_edgelist.csv": 6_000_000,      # ~6 MB
+    "elliptic_txs_features.csv": 170_000_000,  # ~170 MB
+    "elliptic_txs_classes.csv": 4_000_000,  # ~4 MB
+    "elliptic_txs_edgelist.csv": 6_000_000,  # ~6 MB
 }
 
 KAGGLE_DATASET = "ellipticco/elliptic-data-set"
@@ -55,9 +53,8 @@ def download_elliptic(output_dir: Path) -> None:
 
     try:
         import kaggle
-        kaggle.api.dataset_download_files(
-            KAGGLE_DATASET, path=str(output_dir), unzip=True
-        )
+
+        kaggle.api.dataset_download_files(KAGGLE_DATASET, path=str(output_dir), unzip=True)
     except ImportError:
         logger.warning(
             "kaggle package not installed. Install with: pip install kaggle\n"
@@ -78,9 +75,7 @@ def download_elliptic(output_dir: Path) -> None:
         nested.rmdir()
 
     if not _validate_files(output_dir):
-        raise RuntimeError(
-            f"Downloaded files failed validation. Check {output_dir}"
-        )
+        raise RuntimeError(f"Downloaded files failed validation. Check {output_dir}")
 
     logger.info("✓ Download complete and validated")
 
@@ -95,9 +90,7 @@ def _validate_files(directory: Path) -> bool:
         actual_size = fpath.stat().st_size
         # Allow 50% variance in size
         if actual_size < min_size * 0.5:
-            logger.debug(
-                f"File too small: {fname} ({actual_size:,} < {min_size:,})"
-            )
+            logger.debug(f"File too small: {fname} ({actual_size:,} < {min_size:,})")
             return False
     return True
 

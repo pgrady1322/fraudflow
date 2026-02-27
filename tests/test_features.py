@@ -1,12 +1,10 @@
 """Tests for src.features.engineer — graph feature engineering."""
 
-import numpy as np
+import networkx as nx
 import pandas as pd
 import pytest
-import networkx as nx
 
 from src.features.engineer import build_graph, compute_graph_features
-
 
 # ── build_graph ─────────────────────────────────────────────────────
 
@@ -34,11 +32,13 @@ class TestComputeGraphFeatures:
         """Create a directed triangle graph and matching DataFrame."""
         G = nx.DiGraph()
         G.add_edges_from([(1, 2), (2, 3), (3, 1)])
-        df = pd.DataFrame({
-            "txId": [1, 2, 3],
-            "feat_0": [0.1, 0.2, 0.3],
-            "label": [0, 1, 0],
-        })
+        df = pd.DataFrame(
+            {
+                "txId": [1, 2, 3],
+                "feat_0": [0.1, 0.2, 0.3],
+                "label": [0, 1, 0],
+            }
+        )
         return df, G
 
     def test_degree_features(self, triangle_data):

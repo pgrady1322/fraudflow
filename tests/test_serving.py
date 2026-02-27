@@ -1,12 +1,9 @@
 """Tests for src.serving.app — FastAPI model serving."""
 
-import numpy as np
 import pickle
-import pytest
-import tempfile
-from pathlib import Path
-from unittest.mock import patch
 
+import numpy as np
+import pytest
 from fastapi.testclient import TestClient
 from sklearn.ensemble import RandomForestClassifier
 

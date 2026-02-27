@@ -7,11 +7,9 @@ without needing Kaggle credentials. Safe for CI.
 
 from __future__ import annotations
 
-import json
 import pickle
 from pathlib import Path
 
-import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
@@ -20,7 +18,6 @@ from src.data.split import temporal_split
 from src.features.engineer import build_graph, compute_graph_features
 from src.training.models import create_model, get_feature_columns
 from src.training.train import compute_metrics, hybrid_resample
-
 
 # ── Synthetic data factory ──────────────────────────────────────────
 
@@ -147,7 +144,8 @@ class TestEndToEndPipeline:
         model = create_model(
             "xgboost",
             {"n_estimators": 20, "max_depth": 4, "learning_rate": 0.1},
-            n_pos, n_neg,
+            n_pos,
+            n_neg,
         )
         model.fit(X_train_r, y_train_r, eval_set=[(X_val, y_val)], verbose=False)
 
@@ -188,6 +186,7 @@ class TestEndToEndPipeline:
     def test_serving_with_synthetic_model(self):
         """Test the FastAPI serving endpoint with a synthetic model."""
         from fastapi.testclient import TestClient
+
         import src.serving.app as serving_module
 
         # Train a small model

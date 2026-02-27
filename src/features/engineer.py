@@ -38,8 +38,7 @@ def load_raw_elliptic(raw_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.Dat
 
 def build_graph(edges_df: pd.DataFrame) -> nx.DiGraph:
     """Build a directed graph from the edgelist."""
-    G = nx.from_pandas_edgelist(edges_df, source="txId1", target="txId2",
-                                 create_using=nx.DiGraph)
+    G = nx.from_pandas_edgelist(edges_df, source="txId1", target="txId2", create_using=nx.DiGraph)
     logger.info(f"Graph: {G.number_of_nodes():,} nodes, {G.number_of_edges():,} edges")
     return G
 
@@ -219,7 +218,8 @@ def engineer_features(
     if neighbor_cfg.get("hops", 0) > 0:
         logger.info(f"Computing neighbor aggregations ({neighbor_cfg['hops']} hops)...")
         df = compute_neighbor_aggregations(
-            df, G,
+            df,
+            G,
             hops=neighbor_cfg["hops"],
             agg_functions=neighbor_cfg.get("functions", ["mean", "std", "max"]),
         )

@@ -25,15 +25,15 @@ import pandas as pd
 import yaml
 from sklearn.metrics import (
     accuracy_score,
-    f1_score,
-    precision_score,
-    recall_score,
-    roc_auc_score,
     average_precision_score,
     classification_report,
     confusion_matrix,
-    roc_curve,
+    f1_score,
     precision_recall_curve,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+    roc_curve,
 )
 
 from src.training.models import get_feature_columns
@@ -85,7 +85,9 @@ def evaluate_pipeline(cfg: dict[str, Any]) -> dict:
         "test_accuracy": float(accuracy_score(y_test, y_pred)),
         "test_f1_illicit": float(f1_score(y_test, y_pred, pos_label=1, zero_division=0)),
         "test_f1_macro": float(f1_score(y_test, y_pred, average="macro", zero_division=0)),
-        "test_precision_illicit": float(precision_score(y_test, y_pred, pos_label=1, zero_division=0)),
+        "test_precision_illicit": float(
+            precision_score(y_test, y_pred, pos_label=1, zero_division=0)
+        ),
         "test_recall_illicit": float(recall_score(y_test, y_pred, pos_label=1, zero_division=0)),
         "test_auc_roc": float(roc_auc_score(y_test, y_prob)),
         "test_auc_pr": float(average_precision_score(y_test, y_prob)),

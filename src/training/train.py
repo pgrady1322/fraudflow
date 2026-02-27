@@ -28,14 +28,13 @@ import pandas as pd
 import yaml
 from sklearn.metrics import (
     accuracy_score,
+    average_precision_score,
+    confusion_matrix,
     f1_score,
     precision_score,
     recall_score,
     roc_auc_score,
-    average_precision_score,
-    confusion_matrix,
 )
-from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.utils import resample
 
 from src.training.models import create_model, get_feature_columns
@@ -87,9 +86,7 @@ def hybrid_resample(
     target_min = max(target_min, len(X_min))
 
     if len(X_min) < target_min:
-        X_min, y_min = resample(
-            X_min, y_min, n_samples=target_min, random_state=seed, replace=True
-        )
+        X_min, y_min = resample(X_min, y_min, n_samples=target_min, random_state=seed, replace=True)
 
     X_out = np.vstack([X_maj, X_min])
     y_out = np.concatenate([y_maj, y_min])
@@ -149,7 +146,8 @@ def train_pipeline(cfg: dict[str, Any]) -> dict:
 
     if strategy == "hybrid":
         X_train, y_train = hybrid_resample(
-            X_train, y_train,
+            X_train,
+            y_train,
             max_majority=resample_cfg.get("max_majority", 50_000),
             target_minority_ratio=resample_cfg.get("target_minority_ratio", 0.3),
             seed=seed,
@@ -171,7 +169,8 @@ def train_pipeline(cfg: dict[str, Any]) -> dict:
         t0 = time.time()
         if model_cfg["type"] == "xgboost":
             model.fit(
-                X_train, y_train,
+                X_train,
+                y_train,
                 eval_set=[(X_val, y_val)],
                 verbose=False,
             )
@@ -230,10 +229,12 @@ def train_pipeline(cfg: dict[str, Any]) -> dict:
 
     # Log feature importances if available
     if hasattr(model, "feature_importances_"):
-        importance_df = pd.DataFrame({
-            "feature": feature_cols,
-            "importance": model.feature_importances_,
-        }).sort_values("importance", ascending=False)
+        importance_df = pd.DataFrame(
+            {
+                "feature": feature_cols,
+                "importance": model.feature_importances_,
+            }
+        ).sort_values("importance", ascending=False)
         importance_df.to_csv(registry_dir / "feature_importance.csv", index=False)
         mlflow.log_artifact(str(registry_dir / "feature_importance.csv"))
 

@@ -1,9 +1,8 @@
 """Tests for src.training.train — training pipeline helpers."""
 
 import numpy as np
-import pytest
 
-from src.training.train import hybrid_resample, compute_metrics
+from src.training.train import compute_metrics, hybrid_resample
 
 
 class TestHybridResample:
@@ -63,8 +62,12 @@ class TestComputeMetrics:
 
         m = compute_metrics(y_true, y_pred, y_prob)
         expected_keys = {
-            "accuracy", "f1_illicit", "f1_macro",
-            "precision_illicit", "recall_illicit",
-            "auc_roc", "auc_pr",
+            "accuracy",
+            "f1_illicit",
+            "f1_macro",
+            "precision_illicit",
+            "recall_illicit",
+            "auc_roc",
+            "auc_pr",
         }
         assert expected_keys == set(m.keys())

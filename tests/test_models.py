@@ -5,7 +5,6 @@ import pytest
 
 from src.training.models import create_model, get_feature_columns
 
-
 # ── create_model ────────────────────────────────────────────────────
 
 
@@ -69,13 +68,15 @@ class TestGetFeatureColumns:
     def test_excludes_non_features(self):
         import pandas as pd
 
-        df = pd.DataFrame({
-            "txId": [1, 2],
-            "timestep": [1, 1],
-            "label": [0, 1],
-            "feat_0": [0.1, 0.2],
-            "feat_1": [0.3, 0.4],
-        })
+        df = pd.DataFrame(
+            {
+                "txId": [1, 2],
+                "timestep": [1, 1],
+                "label": [0, 1],
+                "feat_0": [0.1, 0.2],
+                "feat_1": [0.3, 0.4],
+            }
+        )
         cols = get_feature_columns(df)
         assert "txId" not in cols
         assert "timestep" not in cols

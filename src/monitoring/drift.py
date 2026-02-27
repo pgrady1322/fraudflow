@@ -19,15 +19,14 @@ import pickle
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import yaml
 from evidently import ColumnMapping
 from evidently.metric_preset import (
+    ClassificationPreset,
     DataDriftPreset,
     DataQualityPreset,
     TargetDriftPreset,
-    ClassificationPreset,
 )
 from evidently.report import Report
 
@@ -70,10 +69,12 @@ def data_drift_report(
         numerical_features=feature_cols,
     )
 
-    report = Report(metrics=[
-        DataDriftPreset(),
-        DataQualityPreset(),
-    ])
+    report = Report(
+        metrics=[
+            DataDriftPreset(),
+            DataQualityPreset(),
+        ]
+    )
 
     report.run(
         reference_data=reference_df[feature_cols],
@@ -141,7 +142,7 @@ def model_performance_report(
     ref = reference_df.copy()
     cur = current_df.copy()
 
-    for df, name in [(ref, "reference"), (cur, "current")]:
+    for df, _name in [(ref, "reference"), (cur, "current")]:
         X = df[feature_cols].fillna(0).values
         df["prediction"] = model.predict(X)
         if hasattr(model, "predict_proba"):
@@ -149,10 +150,12 @@ def model_performance_report(
 
     col_mapping = build_column_mapping(feature_cols)
 
-    report = Report(metrics=[
-        ClassificationPreset(),
-        TargetDriftPreset(),
-    ])
+    report = Report(
+        metrics=[
+            ClassificationPreset(),
+            TargetDriftPreset(),
+        ]
+    )
 
     report.run(
         reference_data=ref,
@@ -203,9 +206,7 @@ def monitor(cfg: dict[str, Any]) -> dict:
         logger.info("── Model Drift Report ──")
         with open(model_path, "rb") as f:
             model = pickle.load(f)
-        model_summary = model_performance_report(
-            train_df, test_df, model, feature_cols, output_dir
-        )
+        model_summary = model_performance_report(train_df, test_df, model, feature_cols, output_dir)
     else:
         logger.warning("No model found — skipping model drift report")
         model_summary = {}
