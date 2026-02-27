@@ -2,7 +2,7 @@
 
 **End-to-end MLOps pipeline for graph-based fraud detection** — DVC pipelines, MLflow experiment tracking, FastAPI model serving, and CI/CD.
 
-Built on the [Elliptic Bitcoin Transaction Dataset](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) with graph topology features and temporal train/val/test splits to prevent data leakage.
+A spin-off of [GraphFraud](https://github.com/pgrady1322/graphfraud), a straight-forward application and test of the models used here. Built on the [Elliptic Bitcoin Transaction Dataset](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) with graph topology features and temporal train/val/test splits to prevent data leakage.
 
 ---
 
@@ -40,6 +40,12 @@ Built on the [Elliptic Bitcoin Transaction Dataset](https://www.kaggle.com/datas
 | Graph features      | NetworkX (degree, clustering, PageRank, betweenness) |
 
 ---
+
+## Example Output from Elliptic Bitcoin Dataset
+
+![Model Comparison after Training](assets/Model_Comparison.png)
+
+![Waterfall Plot of Highest Contributing Features](assets/SHAP_Waterfall.png)
 
 ## Quick Start
 
