@@ -51,7 +51,20 @@ gnn = [
     "torch>=2.0",
     "torch-geometric>=2.4",
 ]
-dev = ["pytest>=7.0", "pytest-cov", "ruff", "mypy"]
+explain = ["shap>=0.44"]
+tuning = ["optuna>=3.5"]
+monitoring = [
+    "evidently>=0.4",
+    "prometheus-client>=0.20",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "fraudflow[explain,tuning,monitoring]",
+]
 all = ["fraudflow[gnn,dev]"]
 
 [project.scripts]

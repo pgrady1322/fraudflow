@@ -109,6 +109,51 @@ def evaluate(config: str):
     )
 
 
+# ── Enhanced Features ───────────────────────────────────────────────
+
+
+@main.command()
+@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+def tune(config: str):
+    """Run Optuna hyperparameter search with MLflow tracking."""
+    from src.training.tune import tune_pipeline
+
+    with open(config) as f:
+        cfg = yaml.safe_load(f)
+
+    result = tune_pipeline(cfg)
+    click.echo(f"✓ Best {list(result.keys())[1]}: {list(result.values())[1]:.4f}")
+    click.echo(f"  Params: {result['best_params']}")
+
+
+@main.command()
+@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+def explain(config: str):
+    """Generate SHAP model explanations."""
+    from src.training.explain import generate_explanations
+
+    with open(config) as f:
+        cfg = yaml.safe_load(f)
+
+    summary = generate_explanations(cfg)
+    click.echo(f"✓ Explanations: {summary['n_samples_explained']} samples, {summary['n_features']} features")
+    click.echo(f"  Top feature: {summary['top_features'][0]['feature']}")
+
+
+@main.command()
+@click.option("-c", "--config", required=True, type=click.Path(exists=True), help="Pipeline config YAML")
+def drift(config: str):
+    """Generate data and model drift monitoring reports."""
+    from src.monitoring.drift import monitor
+
+    with open(config) as f:
+        cfg = yaml.safe_load(f)
+
+    result = monitor(cfg)
+    data = result.get("data_drift", {})
+    click.echo(f"✓ Drift: {data.get('n_drifted', '?')}/{data.get('n_features', '?')} features drifted")
+
+
 # ── Serve ───────────────────────────────────────────────────────────
 
 

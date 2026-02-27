@@ -23,6 +23,14 @@ import numpy as np
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from src.serving.metrics import (
+    PrometheusMiddleware,
+    metrics_endpoint,
+    record_predictions,
+    record_inference_time,
+    update_model_status,
+)
+
 logger = logging.getLogger("fraudflow.serving")
 
 
@@ -93,13 +101,16 @@ async def lifespan(app: FastAPI):
         with open(model_path, "rb") as f:
             _model = pickle.load(f)
         _model_load_time = time.time() - _start_time
+        update_model_status(True, type(_model).__name__)
         logger.info(f"Model loaded from {model_path} in {_model_load_time:.2f}s")
     else:
+        update_model_status(False)
         logger.warning(f"Model not found at {model_path}. /predict will return 503.")
 
     yield
 
     _model = None
+    update_model_status(False)
     logger.info("Serving shutdown complete.")
 
 
@@ -111,6 +122,10 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# Prometheus middleware and endpoint
+app.add_middleware(PrometheusMiddleware)
+app.add_route("/metrics", metrics_endpoint)
 
 
 # ── Endpoints ───────────────────────────────────────────────────────
@@ -153,7 +168,12 @@ async def predict(request: PredictionRequest):
     else:
         probabilities = [float(p) for p in predictions]
 
-    inference_ms = (time.time() - t0) * 1000
+    inference_sec = time.time() - t0
+    inference_ms = inference_sec * 1000
+
+    # Record Prometheus metrics
+    record_inference_time(inference_sec)
+    record_predictions(predictions, probabilities)
 
     return PredictionResponse(
         predictions=predictions,

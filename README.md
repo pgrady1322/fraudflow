@@ -28,8 +28,13 @@ Built on the [Elliptic Bitcoin Transaction Dataset](https://www.kaggle.com/datas
 |---------------------|--------------------|
 | Data versioning     | DVC 3.40+          |
 | Experiment tracking | MLflow 2.10+       |
+| HP optimization     | Optuna 3.5+ (TPE sampler) |
+| Explainability      | SHAP 0.44+         |
+| Drift monitoring    | Evidently 0.4+     |
 | Model serving       | FastAPI + Uvicorn  |
+| Serving metrics     | Prometheus (prometheus-client) |
 | CI/CD               | GitHub Actions     |
+| Code quality        | Ruff, mypy, pre-commit |
 | Containerization    | Docker (multi-stage) |
 | Models              | XGBoost, Random Forest, Logistic Regression |
 | Graph features      | NetworkX (degree, clustering, PageRank, betweenness) |
@@ -91,6 +96,84 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
+## Enhanced Features
+
+### Hyperparameter Tuning (Optuna)
+
+Bayesian optimization with TPE sampler, stratified K-fold CV, and MLflow nested run tracking:
+
+```bash
+fraudflow tune -c configs/pipeline.yaml
+# or
+make tune
+```
+
+Outputs `models/registry/tuning_results.json` and `models/registry/tuning_history.csv`.
+
+### Model Explainability (SHAP)
+
+Global and local feature importance using TreeExplainer (XGBoost/RF) or KernelExplainer (LR):
+
+```bash
+fraudflow explain -c configs/pipeline.yaml
+# or
+make explain
+```
+
+Produces bar, beeswarm, and waterfall plots plus `shap_importance.csv` in `models/registry/explanations/`.
+
+### Data & Model Drift Monitoring (Evidently)
+
+Detect feature distribution shifts and model performance degradation:
+
+```bash
+fraudflow drift -c configs/pipeline.yaml
+# or
+make drift
+```
+
+Generates HTML reports and JSON metrics in `models/registry/drift/`.
+
+### Prometheus Serving Metrics
+
+Live production metrics exposed at `/metrics`:
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `fraudflow_requests_total` | Counter | Total HTTP requests by method/endpoint/status |
+| `fraudflow_predictions_total` | Counter | Predictions by class (illicit/licit) |
+| `fraudflow_inference_latency_seconds` | Histogram | Model inference time |
+| `fraudflow_model_loaded` | Gauge | 1 if model loaded, 0 otherwise |
+
+### Makefile Targets
+
+```bash
+make help          # Show all targets
+make install       # pip install -e .
+make dev           # pip install -e ".[dev]"
+make lint          # ruff check + mypy
+make test          # pytest
+make test-cov      # pytest + coverage report
+make pipeline      # DVC repro
+make tune          # Optuna HP search
+make explain       # SHAP explanations
+make drift         # Evidently drift reports
+make serve         # FastAPI dev server
+make docker        # Build Docker image
+make clean         # Remove caches/artifacts
+```
+
+### Pre-commit Hooks
+
+```bash
+pre-commit install
+pre-commit run --all-files
+```
+
+Runs ruff (lint + format), mypy, trailing whitespace, YAML/JSON/TOML validation, and large file checks on every commit.
+
+---
+
 ## DVC Pipeline
 
 The pipeline has 5 stages, each tracked by DVC for full reproducibility:
@@ -132,11 +215,20 @@ fraudflow/
 │   ├── training/
 │   │   ├── models.py          # Model factory (XGBoost, RF, LR)
 │   │   ├── train.py           # Stage 4: MLflow-tracked training
-│   │   └── evaluate.py        # Stage 5: Test evaluation
+│   │   ├── evaluate.py        # Stage 5: Test evaluation
+│   │   ├── tune.py            # Optuna hyperparameter optimization
+│   │   └── explain.py         # SHAP model explanations
+│   ├── monitoring/
+│   │   └── drift.py           # Evidently drift detection
 │   └── serving/
-│       └── app.py             # FastAPI serving endpoint
-├── tests/                     # 35 pytest tests
+│       ├── app.py             # FastAPI serving endpoint
+│       └── metrics.py         # Prometheus instrumentation
+├── tests/                     # 37 pytest tests
+├── notebooks/
+│   └── 01_pipeline_showcase.ipynb  # End-to-end demo notebook
 ├── .github/workflows/ci.yml   # CI: lint + test + Docker build
+├── .pre-commit-config.yaml    # Code quality hooks
+├── Makefile                   # 18 developer targets
 ├── Dockerfile                 # Multi-stage container
 ├── dvc.yaml                   # DVC pipeline definition
 └── pyproject.toml             # Python project config
@@ -151,6 +243,7 @@ fraudflow/
 | GET    | `/health`     | Service health + model status |
 | POST   | `/predict`    | Batch fraud predictions   |
 | GET    | `/model/info` | Model metadata + params   |
+| GET    | `/metrics`    | Prometheus metrics (text)  |
 
 ---
 
@@ -160,12 +253,13 @@ fraudflow/
 pytest tests/ -v
 ```
 
-35 tests covering:
+37 tests covering:
 - **Model factory** — creation, auto scale_pos_weight, fit/predict
 - **Feature engineering** — graph construction, degree/clustering/PageRank
 - **Temporal split** — file creation, no overlap, ordering, unknown filtering
 - **Training helpers** — hybrid resampling, metric computation
 - **FastAPI serving** — health, predict, batch, error cases, model info
+- **Integration (E2E)** — full pipeline with synthetic data, serving round-trip
 
 ---
 
