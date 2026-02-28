@@ -1,5 +1,9 @@
 # FraudFlow
 
+[![CI](https://github.com/pgrady1322/fraudflow/actions/workflows/ci.yml/badge.svg)](https://github.com/pgrady1322/fraudflow/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 **End-to-end MLOps pipeline for graph-based fraud detection** — DVC pipelines, MLflow experiment tracking, FastAPI model serving, and CI/CD.
 
 A spin-off of [GraphFraud](https://github.com/pgrady1322/graphfraud), a straight-forward application and test of the models used here. Built on the [Elliptic Bitcoin Transaction Dataset](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) with graph topology features and temporal train/val/test splits to prevent data leakage.
