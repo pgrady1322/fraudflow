@@ -14,8 +14,8 @@ A spin-off of [GraphFraud](https://github.com/pgrady1322/graphfraud), a straight
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  Download    │───▶│  Featurize  │───▶│    Split     │───▶│    Train    │───▶│  Evaluate   │
-│  (Kaggle)   │    │ (Graph Topo)│    │  (Temporal)  │    │  (MLflow)   │    │  (Test Set) │
+│  Download   │───▶│  Featurize  │───▶│    Split    │───▶│    Train    │───▶│  Evaluate   │
+│  (Kaggle)   │    │ (Graph Topo)│    │  (Temporal) │    │  (MLflow)   │    │  (Test Set) │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
        DVC stage 1       DVC stage 2       DVC stage 3       DVC stage 4       DVC stage 5
                                                                   │
